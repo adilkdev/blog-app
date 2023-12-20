@@ -14,9 +14,20 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @Configuration
+@EnableWebMvc
 public class SecurityConfig {
+    public static final String[] PUBLIC_URLS = {
+            "/auth/login",
+            "/api/users",
+            "/v2/api-docs/**",
+            "/v3/api-docs/**",
+            "/swagger-resources/**",
+            "/swagger-ui/**",
+            "/webjars/**"
+    };
 
     @Autowired
     private JwtAuthenticationEntryPoint point;
@@ -33,9 +44,8 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .authorizeRequests()
-                .requestMatchers("/api").authenticated()
-                .requestMatchers("/auth").permitAll()
-                .requestMatchers("/api/users").permitAll()
+                .requestMatchers(PUBLIC_URLS).permitAll()
+                .anyRequest().authenticated()
                 .and().exceptionHandling(ex -> ex.authenticationEntryPoint(point))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class);

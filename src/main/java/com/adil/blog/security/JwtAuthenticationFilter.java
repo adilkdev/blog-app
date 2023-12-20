@@ -43,9 +43,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             //looking good
             token = requestHeader.substring(7);
             try {
-
                 username = this.jwtHelper.getUsernameFromToken(token);
-
             } catch (IllegalArgumentException e) {
                 logger.info("Illegal Argument while fetching the username !!");
                 e.printStackTrace();
@@ -57,38 +55,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 e.printStackTrace();
             } catch (Exception e) {
                 e.printStackTrace();
-
             }
-
         } else {
             logger.info("Invalid Header Value !! ");
         }
 
-
-        //
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-
             //fetch user detail from username
             UserDetails userDetails = this.userDetailsService.loadUserByUsername(username);
             Boolean validateToken = this.jwtHelper.validateToken(token, userDetails);
             if (validateToken) {
-
                 //set the authentication
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                 SecurityContextHolder.getContext().setAuthentication(authentication);
-
-
             } else {
                 logger.info("Validation fails !!");
             }
-
-
         }
 
         filterChain.doFilter(request, response);
-
-
     }
 }
